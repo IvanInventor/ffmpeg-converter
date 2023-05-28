@@ -1,0 +1,23 @@
+#!/bin/bash
+
+MODE="$1"
+shift
+
+case "$MODE" in
+	--help|-h)
+		echo "Usage: $0 <mode> [files...]"
+		echo
+		echo "Available modes: av1_40"
+		exit 0
+		;;
+	av1_40)
+		export COMMAND="-c:v libsvtav1 -preset 10 -crf 40 -c:a libvorbis"
+		;;
+	*)
+		echo "Incorrect mode" 1>&2
+		exit 1
+		;;
+esac
+
+export HWACCEL="-hwaccel opencl"
+alacritty -e ~/scripts/ffmpeg-encode-run "$@"
