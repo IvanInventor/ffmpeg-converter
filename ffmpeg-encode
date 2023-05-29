@@ -1,5 +1,4 @@
 #!/bin/bash
-
 MODE="$1"
 shift
 
@@ -7,14 +6,14 @@ case "$MODE" in
 	--help|-h)
 		echo "Usage: $0 <mode> [files...]"
 		echo
-		echo "Available modes: av1_40"
+		echo "Available modes: av1_40, av1_40_FHD"
 		exit 0
 		;;
 	av1_40)
-		export COMMAND="-c:v libsvtav1 -preset 10 -crf 40 -c:a libvorbis"
+		export COMMAND=('-c:v' 'libsvtav1' '-preset' '10' '-crf' '40' '-c:a' 'libvorbis')
 		;;
 	av1_40_FHD)
-		export COMMAND="-c:v libsvtav1 -vf "scale='if(gt(iw,1920) * gt(ih,1080),1920,-1)':'if(gt(iw,1920) * gt(ih,1080),-1,1080)'" -preset 10 -crf 40 -c:a libvorbis"
+		export COMMAND=('-c:v' 'libsvtav1' '-vf' 'scale='"'"'if(gt(iw,1920) * gt(ih,1080),1920,-1)'"'"':'"'"'if(gt(iw,1920) * gt(ih,1080),-1,1080)'"'" '-preset' '10' '-crf' '40' '-c:a' 'libvorbis')
 		;;
 	*)
 		echo "Incorrect mode" 1>&2
@@ -25,19 +24,19 @@ esac
 HWACCEL="-hwaccel auto"
 
 trap "export INT=''; kill -INT %1" SIGINT
-:
+
 for i in "$@"; do
 	INPUT="$i"
 	OUTPUT="$(echo -n "$INPUT" | sed -z 's/\.[^\/]\+$\|$/.mkv/')"
-	TEMP_OUTPUT="$(echo -n "$INPUT" | sed 's/[^\/]*$//').$(echo -n \"$INPUT\" | md5sum | head -c32).mkv"
+	TEMP_OUTPUT="$(echo -n "$INPUT" | sed -z 's/[^\/]*$//').$(echo -n \"$INPUT\" | md5sum | head -c32).mkv"
 
-	ffmpeg $HWACCEL -i "$INPUT" $COMMAND "$TEMP_OUTPUT"
+	ffmpeg $HWACCEL -i "$INPUT" "${COMMAND[@]}" "$TEMP_OUTPUT"
 	if [ "$?" == "0" ]; then
 		mv "$INPUT" "${INPUT}.old"
 		mv "$TEMP_OUTPUT" "$OUTPUT"
 	else
 		rm "$TEMP_OUTPUT" 2>/dev/null
-		read -p "ERROR, press any key to exit..."
+		echo "[ERROR]"
 		exit 1
 	fi
 done
