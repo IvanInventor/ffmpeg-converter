@@ -10,10 +10,10 @@ case "$MODE" in
 		exit 0
 		;;
 	av1_40)
-		export COMMAND=('-c:v' 'libsvtav1' '-preset' '10' '-crf' '40' '-c:a' 'libvorbis')
+		export COMMAND=(-c:v libsvtav1 -preset 10 -crf 40 -c:a libvorbis)
 		;;
 	av1_40_FHD)
-		export COMMAND=('-c:v' 'libsvtav1' '-vf' 'scale='"'"'if(gt(iw,1920) * gt(ih,1080),1920,-1)'"'"':'"'"'if(gt(iw,1920) * gt(ih,1080),-1,1080)'"'" '-preset' '10' '-crf' '40' '-c:a' 'libvorbis')
+		export COMMAND=(-c:v libsvtav1 -vf "scale='if(gt(iw,1920) * gt(ih,1080),1920,-1)':'if(gt(iw,1920) * gt(ih,1080),-1,1080)'" -preset 10 -crf 40 -c:a libvorbis)	
 		;;
 	*)
 		echo "Incorrect mode" 1>&2
@@ -41,3 +41,4 @@ for i in "$@"; do
 	fi
 done
 
+echo '-------- FINISHED --------'
