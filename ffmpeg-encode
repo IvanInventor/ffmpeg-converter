@@ -27,8 +27,14 @@ trap "export INT=''; kill -INT %1" SIGINT
 
 for i in "$@"; do
 	INPUT="$i"
-	OUTPUT="$(echo -n "$INPUT" | sed -z 's/\.[^\/]\+$\|$/.mkv/')"
+	OUTPUT="$(echo -n "$INPUT" | sed -z 's/\.[^\.\/]\+$\|$/.mkv/')"
 	TEMP_OUTPUT="$(echo -n "$INPUT" | sed -z 's/[^\/]*$//').$(echo -n \"$INPUT\" | md5sum | head -c32).mkv"
+
+	# DEBUG
+	# echo "$INPUT"
+	# echo "$OUTPUT"
+	# echo "$TEMP_OUTPUT"
+	# continue
 
 	ffmpeg $HWACCEL -i "$INPUT" "${COMMAND[@]}" "$TEMP_OUTPUT"
 	if [ "$?" == "0" ]; then
