@@ -1,4 +1,6 @@
 #!/bin/bash
+#ffmpeg -hwaccel auto -i -c:v libsvtav1 -vf "scale=1920:1080" -preset 10 -crf 40 -c:a libvorbis
+
 MODE="$1"
 shift
 
@@ -23,7 +25,8 @@ esac
 
 HWACCEL="-hwaccel auto"
 
-trap "export INT=''; kill -INT %1" SIGINT
+trap "export INT=1; kill -INT %1" SIGINT
+SKIPPED=()
 
 for i in "$@"; do
 	INPUT="$i"
@@ -37,14 +40,19 @@ for i in "$@"; do
 	# continue
 
 	ffmpeg $HWACCEL -i "$INPUT" "${COMMAND[@]}" "$TEMP_OUTPUT"
-	if [ "$?" == "0" ]; then
+	OUT="$?"
+	if [ "$INT" != "" ]; then
+		exit 1
+	fi
+
+	if [ "$OUT" == "0" ]; then
 		mv "$INPUT" "${INPUT}.old"
 		mv "$TEMP_OUTPUT" "$OUTPUT"
 	else
 		rm "$TEMP_OUTPUT" 2>/dev/null
-		echo "[ERROR]"
-		exit 1
+		SKIPPED+=("$INPUT")
 	fi
 done
 
 echo '-------- FINISHED --------'
+[ "${#SKIPPED[@]}" != "0" ] && printf '%s\n' "Skipped videos:" "${SKIPPED[@]}"
