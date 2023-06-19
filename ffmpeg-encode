@@ -1,6 +1,19 @@
 #!/bin/bash
 #ffmpeg -hwaccel auto -i -c:v libsvtav1 -vf "scale=1920:1080" -preset 10 -crf 40 -c:a libvorbis
 
+# Scaling filters
+# Scales video to desired resolution without stretching, with option of allowing one axis greater then chosen
+#
+# Args:	_OW=...; _OH=...	Resolution (e.g. 1920:1080)
+# _OW >= _OH, vertical videos supported
+#
+# Greater axis
+# _SCALE="scale='if(gt(a,1),$_OW,$_OH)':'if(gt(a,1),$_OH,$_OW)':force_original_aspect_ratio=increase:force_divisible_by=2"
+#
+# Lesser axis
+# _SCALE="scale='if(gt(a,1),$_OW,$_OH)':'if(gt(a,1),$_OH,$_OW)':force_original_aspect_ratio=decrease:force_divisible_by=2"
+#
+
 MODE="$1"
 shift
 
@@ -12,16 +25,22 @@ case "$MODE" in
 		exit 0
 		;;
 	av1_40)
-		export COMMAND=(-c:v libsvtav1 -preset 10 -crf 40 -c:a libvorbis)
+		COMMAND=(-c:v libsvtav1 -preset 10 -crf 40 -c:a libvorbis)
 		;;
 	av1_40_FHD)
-		export COMMAND=(-c:v libsvtav1 -vf "scale='if(gt(iw,1920) * gt(ih,1080),1920,-1)':'if(gt(iw,1920) * gt(ih,1080),-1,1080)'" -preset 10 -crf 40 -c:a libvorbis)	
+		COMMAND=(-c:v libsvtav1 -vf "scale='if(gt(iw,1920) + gt(ih,1080),1920,-1)':'if(gt(iw,1920) + gt(ih,1080),-1,1080)'" -preset 10 -crf 40 -c:a libvorbis)	
 		;;
 	av1_40_FHD_scale)
-		export COMMAND=(-c:v libsvtav1 -vf "scale='if(gt(iw,1920) * gt(ih,1080),if(gt(iw/1920,ih/1080),ceil(iw*1080/ih/2)*2, 1920),iw)':'if(gt(iw,1920) * gt(ih,1080),if(gt(iw/1920,ih/1080),1080,ceil(ih*1920/iw/2)*2),ih)'" -preset 10 -crf 40 -c:a libvorbis)	
+		_OW=1920; _OH=1080
+		_SCALE="scale='if(gt(a,1),$_OW,$_OH)':'if(gt(a,1),$_OH,$_OW)':force_original_aspect_ratio=increase:force_divisible_by=2"
+
+		COMMAND=(-c:v libsvtav1 -vf "$_SCALE" -preset 10 -crf 40 -c:a libvorbis)	
 		;;
 	av1_40_FHD_scale_l)
-		export COMMAND=(-c:v libsvtav1 -vf "scale='if(gt(iw,1920) * gt(ih,1080),if(gt(iw/1920,ih/1080),1920,ceil(iw*1080/ih/2)*2),iw)':'if(gt(iw,1920) * gt(ih,1080),if(gt(iw/1920,ih/1080),ceil(ih*1920/iw/2)*2,1080),ih)'" -preset 10 -crf 40 -c:a libvorbis)	
+		_OW=1920; _OH=1080
+		_SCALE="scale='if(gt(a,1),$_OW,$_OH)':'if(gt(a,1),$_OH,$_OW)':force_original_aspect_ratio=decrease:force_divisible_by=2"
+
+		COMMAND=(-c:v libsvtav1 -vf "$_SCALE" -preset 10 -crf 40 -c:a libvorbis)	
 		;;
 	*)
 		echo "Incorrect mode" 1>&2
