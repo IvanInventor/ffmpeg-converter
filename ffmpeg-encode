@@ -32,13 +32,13 @@ case "$MODE" in
 		;;
 	av1_40_FHD_scale)
 		_OW=1920; _OH=1080
-		_SCALE="scale='if(gt(a,1),$_OW,$_OH)':'if(gt(a,1),$_OH,$_OW)':force_original_aspect_ratio=increase:force_divisible_by=2"
+		_SCALE="scale='if(gt(a,1),if(gt(iw,$_OW)+gt(ih,$_OH),$_OW,iw),if(gt(iw,$_OH)+gt(ih,$_OW),$_OH,iw))':'if(gt(a,1),if(gt(iw,$_OW)+gt(ih,$_OH),$_OH,ih),if(gt(iw,$_OH)+gt(ih,$_OW),$_OW,ih))':force_original_aspect_ratio=increase:force_divisible_by=2"
 
 		COMMAND=(-c:v libsvtav1 -vf "$_SCALE" -preset 10 -crf 40 -c:a libvorbis)	
 		;;
 	av1_40_FHD_scale_l)
 		_OW=1920; _OH=1080
-		_SCALE="scale='if(gt(a,1),$_OW,$_OH)':'if(gt(a,1),$_OH,$_OW)':force_original_aspect_ratio=decrease:force_divisible_by=2"
+		_SCALE="scale='if(gt(a,1),if(gt(iw,$_OW)+gt(ih,$_OH),$_OW,iw),if(gt(iw,$_OH)+gt(ih,$_OW),$_OH,iw))':'if(gt(a,1),if(gt(iw,$_OW)+gt(ih,$_OH),$_OH,ih),if(gt(iw,$_OH)+gt(ih,$_OW),$_OW,ih))':force_original_aspect_ratio=decrease:force_divisible_by=2"
 
 		COMMAND=(-c:v libsvtav1 -vf "$_SCALE" -preset 10 -crf 40 -c:a libvorbis)	
 		;;
