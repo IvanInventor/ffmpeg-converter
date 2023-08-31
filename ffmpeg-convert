@@ -46,6 +46,7 @@ case "$MODE" in
 		echo "Incorrect mode" 1>&2
 		exit 1
 		;;
+	# Add custom entries here
 esac
 
 HWACCEL="-hwaccel auto"
